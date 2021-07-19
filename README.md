@@ -8,7 +8,11 @@
     - Mention the features of the frontend and include the screenshots of the screens as well.
      
 - We want you to keep track of time in a `Timesheet.md` file. You can have this file in root of `Backend`, here is a sample entry in the time sheet file.
+Below each milestone entry also add the estimated time you think you will take to finish that milestone.
+
 ```
+## Milestone 1
+Estimated time: 5hrs
 ### Part 1
     19 Jul '21 
     13:53 - 14:35: Working on the login and signup API 

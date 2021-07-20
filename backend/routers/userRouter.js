@@ -16,8 +16,9 @@ const router = express.Router();
 //   });
 
 router.post("/signup", async (req, res) => {
+  console.log(req.body)
   let result = await createNewUser(req.body);
-  if (result.status) res.status(200).json({ message: result.message });
+  if (result.status) res.status(200).json({ access_token: result.access_token,refresh_token:result.refresh_token });
   else res.status(400).json({ message: result.message });
 });
 
@@ -32,8 +33,8 @@ router.post("/login", async (req, res) => {
 });
 
 router.post("/logout", async (req, res) => {
-  let { username } = req.body;
-  let result = await deleteRefreshTokenOfUser(username);
+  // let { username } = req.body;
+  let result = await deleteRefreshTokenOfUser(req.headers.refresh_token);
   if (result.status) res.status(200).json({ message: result.message });
   else res.status(400).json({ message: result.message });
 });

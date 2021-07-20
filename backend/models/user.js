@@ -14,12 +14,12 @@ const UserSchema = mongoose.Schema({
   password: {
     type: String,
     required: true,
-  },
-  refreshToken: {
-    type: String,
-    required: true,
-    unique: false,
-  },
+  }
+  // refreshToken: {
+  //   type: String,
+  //   required: true,
+  //   unique: false,
+  // },
 });
 
 const UserModel = mongoose.model("User", UserSchema);

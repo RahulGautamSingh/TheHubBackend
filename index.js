@@ -31,5 +31,5 @@ app.use("/user", userRouter);
 
 const PORT = 3200;
 app.listen(PORT, () => {
-  console.log(`Listening at http://localhost:${PORT}`);
+  console.log("Listening at http://localhost:"+PORT);
 });

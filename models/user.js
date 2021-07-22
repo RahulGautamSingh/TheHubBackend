@@ -14,6 +14,7 @@ const UserSchema = mongoose.Schema({
   password: {
     type: String,
     required: true,
+    unique:false
   }
   // refreshToken: {
   //   type: String,

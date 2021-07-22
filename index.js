@@ -23,8 +23,9 @@ mongoose.connect(
 );
 
 const userRouter = require("./routers/userRouter");
+const postRouter = require("./routers/postRouter")
 app.use("/user", userRouter);
-
+app.use("/post", postRouter)
 
 
 

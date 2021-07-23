@@ -120,9 +120,73 @@ const refreshAccessToken = async (refresh_token) => {
   }
 };
 
+const followUser = async (token,username)=>{
+  try{
+    let decoded = jwt.verify(access_token, process.env.ACCESS_TOKEN_SECRET);
+    let followerName = decoded.username;
+    let follower = await User.findOne({username:followerName})
+    let user = await User.findOne({username:username})
+   follower.following.push(user._id)
+   await follower.save();
+   user.followers.push(follower._id);
+   await user.save();
+   return {status:true,message:"FOLLOWED"}
+  }
+  catch(err){
+    console.log(err)
+    return {status:false,message:err.message}
+  }
+
+}
+
+
+const unfollowUser = async (token,username)=>{
+  try{
+    let decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    let followerName = decoded.username;
+    let follower = await User.findOne({username:followerName})
+    let user = await User.findOne({username:username})
+   follower.following.pull(user._id)
+   await follower.save();
+   user.followers.pull(follower._id);
+   await user.save();
+   return {status:true,message:"UNFOLLOWED"}
+  }
+  catch(err){
+    console.log(err)
+    return {status:false,message:err.message}
+  }
+
+}
+
+const suggestedList = async(token)=>{
+try{
+  let decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+  let user = await User.findOne({username:decoded.username});
+  let users = await User.find({});
+  let arr = []
+  let count = 5,index=0;
+
+  while(count && index<users.length){
+   if(!user.following.includes(users[index]._id)){
+     arr.push(users[i]);count--;
+   }index++;
+  }
+  return {status:true,suggestedList:arr}
+}
+ catch(err){
+   console.log(err)
+   return {status:false,message:err.message}
+
+ }
+}
 module.exports = {
   createNewUser,
   findUser,
   deleteRefreshTokenOfUser,
   refreshAccessToken,
+  followUser,
+  unfollowUser,
+  suggestedList
 };

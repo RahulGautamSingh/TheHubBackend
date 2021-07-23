@@ -4,6 +4,8 @@ const {
   findUser,
   deleteRefreshTokenOfUser,
   refreshAccessToken,
+  followUser,
+  unfollowUser,
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -46,6 +48,28 @@ router.post("/token", async (req, res) => {
     res.status(200).json({ access_token: result.access_token });
   else res.status(400).json({ message: result.message });
 });
+
+router.post("/follow",async(req,res)=>{
+
+  let result = await followUser(req.body);
+  if(result.status) res.status(200).json({ message:result.message });
+ else res.status(400).json({ message:result.message });
+
+})
+
+router.post("/unfollow",async(req,res)=>{
+
+  let result = await unfollowUser(req.body);
+  if(result.status) res.status(200).json({ message:result.message });
+ else res.status(400).json({ message:result.message });
+
+})
+
+router.post("/suggestions",async(req,res)=>{
+let result = await suggestedList(req.headers.access_token);
+  if(result.status) res.status(200).json({ list:result.suggestedLList });
+ else res.status(400).json({ message:result.message });
+})
 
 module.exports = router;
 

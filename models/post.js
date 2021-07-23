@@ -9,20 +9,17 @@ const PostSchema = mongoose.Schema({
     user:{
         type:mongoose.SchemaTypes.ObjectId,
         required:true,
-        unique:false
+        unique:false,
+        ref:'User'
     },
     likes:{
         type:[mongoose.SchemaTypes.ObjectId],
         required:true,
         unique:false,
-        defualt:[]
+        defualt:[],
+        ref:'User'
     },
-    id:{
-        type:String,
-        required:true,
-        unique:false
-        
-    }
+  
 })
 
 const PostModel = mongoose.model('Post',PostSchema)

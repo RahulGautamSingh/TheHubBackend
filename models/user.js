@@ -15,6 +15,24 @@ const UserSchema = mongoose.Schema({
     type: String,
     required: true,
     unique:false
+  },
+  followers:{
+    type:[mongoose.SchemaTypes.ObjectId],
+    default:[],
+    unique:false,
+    ref:'User'
+  },
+  following:{
+    type:[mongoose.SchemaTypes.ObjectId],
+    default:[],
+    unique:false,
+    ref:'User'
+  },
+  posts:{
+    type:[mongoose.SchemaTypes.ObjectId],
+    default:[],
+    unique:false,
+    ref:'Post'
   }
   // refreshToken: {
   //   type: String,

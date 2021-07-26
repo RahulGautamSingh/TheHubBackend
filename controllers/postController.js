@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const createNewPost = async ({ detail, token }) => {
   try {
     let decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    console.log(decoded);
+    // console.log(decoded);
     let username = decoded.username;
     let user = await UserModel.findOne({ username: username });
     let post = new Post({
@@ -15,7 +15,8 @@ const createNewPost = async ({ detail, token }) => {
     await post.save();
     let postsArr = user.posts;
     postsArr.push(post._id);
-    await UserModel.updateOne({ _id: user._id }, { posts: postsArr });
+    await user.save();
+    // await UserModel.updateOne({ _id: user._id }, { posts: postsArr });
     return { status: true, message: "POST CREATED" };
   } catch (err) {
     console.log(err);
@@ -33,7 +34,7 @@ const deletePost = async ({ id, token }) => {
     await Post.findOneAndDelete({ _id: id });
     return { status: true, message: "POST REMOVED" };
   } catch (err) {
-    console.log(err)
+    console.log(err);
     return { status: false, message: err };
   }
 };
@@ -49,7 +50,7 @@ const likePost = async ({ id, token }) => {
     await Post.updateOne({ _id: id }, { likes: [likesArr] });
     return { status: true, message: "POST LIKED" };
   } catch (err) {
-    console.log(err)
+    console.log(err);
     return { status: false, message: err };
   }
 };
@@ -59,15 +60,14 @@ const fetchPostList = async (access_token) => {
     let decoded = jwt.verify(access_token, process.env.ACCESS_TOKEN_SECRET);
     let username = decoded.username;
     let user = await UserModel.findOne({ username: username });
-    let posts = [];
-    user.followers.forEach(async(elem) => {
-    let arr = await Post.find({user:elem}).populate('posts')
-    posts.push(...arr)
-    });
-    if(posts.length>20) posts = posts.slice(0,20)
-    return { status: true, posts: posts };
+    let posts = await Post.find({
+      'user' : user.following
+  }).populate('user'); 
+    if (posts.length > 20) posts = posts.slice(0, 20);
+    console.log("post", posts);
+    return { status: true, "posts": posts };
   } catch (err) {
-    console.log(err.message)
+    console.log(err.message);
     return { status: false, message: err.message };
   }
 };

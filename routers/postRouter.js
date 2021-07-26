@@ -11,10 +11,9 @@ router.get("/", async (req, res) => {
   let result = await fetchPostList(req.headers.access_token);
   if (result.status) res.status(200).json({ posts: result.posts });
   else if (result.message === "jwt expired")
-  res.status(401).json({ message: result.message });
-else res.status(400).json({ message: result.message });
+    res.status(401).json({ message: result.message });
+  else res.status(400).json({ message: result.message });
 });
-  
 
 //add a post
 router.post("/", async (req, res) => {

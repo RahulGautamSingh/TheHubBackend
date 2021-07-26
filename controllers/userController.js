@@ -23,11 +23,13 @@ const createNewUser = async (userObj) => {
   if (!validateEmail(userObj.email))
     return { status: false, message: "Invalid email format." };
 
-    let user = await User.findOne({username:userObj.username})
-    if(user!==null) return {status:false,message:"Username already exists."}
+  let user = await User.findOne({ username: userObj.username });
+  if (user !== null)
+    return { status: false, message: "Username already exists." };
 
-     user = await User.findOne({email:userObj.email})
-    if(user!==null) return {status:false,message:"Email ID already in use."}
+  user = await User.findOne({ email: userObj.email });
+  if (user !== null)
+    return { status: false, message: "Email ID already in use." };
 
   const salt = bcrypt.genSaltSync(10);
   const hash = bcrypt.hashSync(userObj.password, salt);
@@ -37,16 +39,16 @@ const createNewUser = async (userObj) => {
       email: userObj.email,
     };
     let tokens = generateTokens(payload);
-   
-     user = new User({
+
+    user = new User({
       username: userObj.username,
       email: userObj.email,
-      password: hash
+      password: hash,
     });
     await user.save();
     // console.log(user);
-    let r_t = new Token({token:tokens[1],user:user._id})
-    await r_t.save()
+    let r_t = new Token({ token: tokens[1], user: user._id });
+    await r_t.save();
     return { status: true, access_token: tokens[0], refresh_token: tokens[1] };
   } catch (err) {
     console.log(err);
@@ -55,16 +57,15 @@ const createNewUser = async (userObj) => {
 };
 
 const findUser = async (userObj) => {
-    console.log(userObj)
-  let user = await User.findOne({ username:userObj.username }).catch((err) => {
+  console.log(userObj);
+  let user = await User.findOne({ username: userObj.username }).catch((err) => {
     return { status: false, message: err };
   });
   if (user === null) return { status: false, message: "No such user" };
   let result = bcrypt.compareSync(userObj.password, user.password); // true
-  if(!result) return {status:false,message:"Wrong password"}
+  if (!result) return { status: false, message: "Wrong password" };
 
   try {
-
     let payload = {
       username: user.username,
       email: user.email,
@@ -74,8 +75,8 @@ const findUser = async (userObj) => {
     //   { _id: user._id },
     //   { $set: { refreshToken: tokens[1] } }
     // );
-    let r_t = new Token({token:tokens[1],user:user._id})
-    await r_t.save()
+    let r_t = new Token({ token: tokens[1], user: user._id });
+    await r_t.save();
     return { status: true, access_token: tokens[0], refresh_token: tokens[1] };
   } catch (err) {
     return { status: false, message: err };
@@ -83,15 +84,14 @@ const findUser = async (userObj) => {
 };
 
 const deleteRefreshTokenOfUser = async (refreshToken) => {
-  
   try {
-   await Token.deleteOne({token:refreshToken})
+    await Token.deleteOne({ token: refreshToken });
 
     // await User.updateOne({ username:username }, { refreshToken: null });
     // user = await User.find({ username: username }).catch((err) => {
     //   return { status: false, message: err };
     // });
-  
+
     return { status: true, message: "USER LOGGED OUT" };
   } catch (err) {
     console.log(err);
@@ -103,9 +103,9 @@ const refreshAccessToken = async (refresh_token) => {
   try {
     // console.log(refresh_token);
     let r_t = await Token.findOne({ token: refresh_token });
-    if(r_t===null) return {status:false,message:"Token Invalid"}
+    if (r_t === null) return { status: false, message: "Token Invalid" };
     // console.log(user)
-    let user = await User.findOne({_id:r_t.user})
+    let user = await User.findOne({ _id: r_t.user });
     let payload = {
       username: user.username,
       email: user.email,
@@ -120,67 +120,58 @@ const refreshAccessToken = async (refresh_token) => {
   }
 };
 
-const followUser = async (token,username)=>{
-  try{
-    let decoded = jwt.verify(access_token, process.env.ACCESS_TOKEN_SECRET);
-    let followerName = decoded.username;
-    let follower = await User.findOne({username:followerName})
-    let user = await User.findOne({username:username})
-   follower.following.push(user._id)
-   await follower.save();
-   user.followers.push(follower._id);
-   await user.save();
-   return {status:true,message:"FOLLOWED"}
-  }
-  catch(err){
-    console.log(err)
-    return {status:false,message:err.message}
-  }
-
-}
-
-
-const unfollowUser = async (token,username)=>{
-  try{
+const followUser = async ({ token, username }) => {
+  try {
+    // console.log(token);
     let decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     let followerName = decoded.username;
-    let follower = await User.findOne({username:followerName})
-    let user = await User.findOne({username:username})
-   follower.following.pull(user._id)
-   await follower.save();
-   user.followers.pull(follower._id);
-   await user.save();
-   return {status:true,message:"UNFOLLOWED"}
+    let follower = await User.findOne({ username: followerName });
+    let user = await User.findOne({ username: username });
+    follower.following.push(user._id);
+    await follower.save();
+    user.followers.push(follower._id);
+    await user.save();
+    return { status: true, message: "FOLLOWED" };
+  } catch (err) {
+    console.log(err);
+    return { status: false, message: err.message };
   }
-  catch(err){
-    console.log(err)
-    return {status:false,message:err.message}
+};
+
+const unfollowUser = async ({ token, username }) => {
+  try {
+    let decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    let followerName = decoded.username;
+    let follower = await User.findOne({ username: followerName });
+    let user = await User.findOne({ username: username });
+    follower.following.pull(user._id);
+    await follower.save();
+    user.followers.pull(follower._id);
+    await user.save();
+    return { status: true, message: "UNFOLLOWED" };
+  } catch (err) {
+    console.log(err);
+    return { status: false, message: err.message };
   }
+};
 
-}
+const suggestedList = async (token) => {
+  try {
+    let decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-const suggestedList = async(token)=>{
-try{
-  let decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    let user = await User.findOne({ username: decoded.username });
+    let userArr = [user._id,...user.following]
+    console.log(userArr)
+    let arr = await User.find({'_id':{$nin:userArr}}).populate('user').limit(5);
+ 
 
-  let user = await User.findOne({username:decoded.username});
-  let users = await User.find({});
-  let arr = []
-  let count = 5,index=0;
-
-  while(count && index<users.length){
-   if(!user.following.includes(users[index]._id)){
-     arr.push(users[i]);count--;
-   }index++;
+    // console.log("arrat",arr)
+    return { status: true, suggestedList: arr };
+  } catch (err) {
+    console.log(err);
+    return { status: false, message: err.message };
   }
-  return {status:true,suggestedList:arr}
-}
- catch(err){
-   console.log(err)
-   return {status:false,message:err.message}
-
- }
-}
+};
 module.exports = {
   createNewUser,
   findUser,
@@ -188,5 +179,5 @@ module.exports = {
   refreshAccessToken,
   followUser,
   unfollowUser,
-  suggestedList
+  suggestedList,
 };

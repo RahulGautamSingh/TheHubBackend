@@ -2,7 +2,7 @@ const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Token = require("../models/token");
-
+const Post = require("../models/post");
 function validateEmail(email) {
   const re =
     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -160,13 +160,58 @@ const suggestedList = async (token) => {
     let decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
     let user = await User.findOne({ username: decoded.username });
-    let userArr = [user._id,...user.following]
-    console.log(userArr)
-    let arr = await User.find({'_id':{$nin:userArr}}).populate('user').limit(5);
- 
+    let userArr = [user._id, ...user.following];
+    console.log(userArr);
+    let arr = await User.find({ _id: { $nin: userArr } })
+      .populate("user")
+      .limit(5);
 
     // console.log("arrat",arr)
     return { status: true, suggestedList: arr };
+  } catch (err) {
+    console.log(err);
+    return { status: false, message: err.message };
+  }
+};
+
+const getUserData = async ({ token, username }) => {
+  let userName = username;
+  let follow = null;
+  //check for loggedInUSer
+  if (userName === null) {
+    try {
+      let decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+      userName = decoded.username;
+    } catch (err) {
+      console.log(err);
+      return { status: false, message: err.message };
+    }
+  } else {
+    //checking if loggedInUsser follows searched user or not
+    try {
+      let decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+      let loggedInUser = await User.findOne({ username: decoded.username });
+      let user = await User.findOne({ username: userName });
+      if (user.followers.includes(loggedInUser._id)) follow = true;
+      else follow = false;
+    } catch (err) {
+      console.log(err);
+
+      return{status:false,message:err.message}
+    }
+  }
+  //get users profile and posts and send them to router
+  try {
+    let user = await User.findOne({ username: userName }).populate('posts');
+    let decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    let loggedInUser = await User.findOne({ username: decoded.username });
+    let posts = user.posts;
+    posts  =  posts.map(elem=>{
+      if(elem.likes.includes(loggedInUser._id)) return {...elem._doc,liked:true}
+      else return {...elem._doc,liked:false}
+    })
+
+    return { status: true, obj: { user: user, posts:posts ,follow: follow } };
   } catch (err) {
     console.log(err);
     return { status: false, message: err.message };
@@ -180,4 +225,5 @@ module.exports = {
   followUser,
   unfollowUser,
   suggestedList,
+  getUserData
 };

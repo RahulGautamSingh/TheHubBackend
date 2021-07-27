@@ -39,19 +39,38 @@ const deletePost = async ({ id, token }) => {
   }
 };
 
-const likePost = async ({ id, token }) => {
+
+
+const dislikePost = async ({ id, token }) => {
   try {
     let decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    let username = decoded.payload.username;
+    let username = decoded.username;
     let user = await UserModel.findOne({ username: username });
     let post = await Post.findOne({ _id: id });
-    let likesArr = post.likes;
-    likesArr.push(user._id);
-    await Post.updateOne({ _id: id }, { likes: [likesArr] });
+    
+    post.likes.pull(user._id);
+    await post.save()
     return { status: true, message: "POST LIKED" };
   } catch (err) {
     console.log(err);
-    return { status: false, message: err };
+    return { status: false, message: err.message };
+  }
+};
+
+
+const likePost = async ({ id, token }) => {
+  try {
+    let decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    let username = decoded.username;
+    let user = await UserModel.findOne({ username: username });
+    let post = await Post.findOne({ _id: id });
+    let likesArr = post.likes;
+    post.likes.push(user._id);
+    await post.save();
+    return { status: true, message: "POST LIKED" };
+  } catch (err) {
+    console.log(err);
+    return { status: false, message: err.message };
   }
 };
 
@@ -62,9 +81,12 @@ const fetchPostList = async (access_token) => {
     let user = await UserModel.findOne({ username: username });
     let posts = await Post.find({
       'user' : user.following
-  }).populate('user'); 
-    if (posts.length > 20) posts = posts.slice(0, 20);
-    console.log("post", posts);
+  }).populate('user').limit(20); 
+ posts  =  posts.map(elem=>{
+    if(elem.likes.includes(user._id)) return {...elem._doc,liked:true}
+    else return {...elem._doc,liked:false}
+  })
+  console.log(posts)
     return { status: true, "posts": posts };
   } catch (err) {
     console.log(err.message);
@@ -77,4 +99,5 @@ module.exports = {
   deletePost,
   likePost,
   fetchPostList,
+  dislikePost
 };

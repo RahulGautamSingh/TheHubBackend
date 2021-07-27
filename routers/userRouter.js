@@ -7,6 +7,7 @@ const {
   followUser,
   unfollowUser,
   suggestedList,
+  getUserData,
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -67,6 +68,8 @@ router.post("/follow", async (req, res) => {
 router.post("/unfollow", async (req, res) => {
   let result = await unfollowUser(req.body);
   if (result.status) res.status(200).json({ message: result.message });
+  else if (result.message === "jwt expired")
+    res.status(401).json({ message: result.message });
   else res.status(400).json({ message: result.message });
 });
 
@@ -77,5 +80,6 @@ router.get("/suggestions", async (req, res) => {
     res.status(401).json({ message: result.message });
   else res.status(400).json({ message: result.message });
 });
+
 
 module.exports = router;

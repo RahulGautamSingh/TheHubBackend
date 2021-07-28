@@ -7,20 +7,24 @@ const {
   followUser,
   unfollowUser,
   suggestedList,
-  getUserData,
+  
 } = require("../controllers/userController");
-
+const multer  = require('multer')
 const router = express.Router();
-
-// router.get("/", async (req, res) => {
-//     let { access_token } = req.body;
-//     let result = await userData(access_token);
-//     if (result.status) res.status(200).json({ user: result.user });
-//     else res.status(400).json({ message: result.message });
-//   });
-
-router.post("/signup", async (req, res) => {
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "static/uploads/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
+});
+const multipart = multer({ storage: storage });
+//signup handler
+router.post("/signup",multipart.single('image'), async (req, res) => {
+  console.log(req.file)
   console.log(req.body);
+  req.body.image = req.file.path;
   let result = await createNewUser(req.body);
   if (result.status)
     res

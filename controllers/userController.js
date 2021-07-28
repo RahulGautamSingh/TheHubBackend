@@ -44,8 +44,10 @@ const createNewUser = async (userObj) => {
       username: userObj.username,
       email: userObj.email,
       password: hash,
+      image:userObj.image
     });
     await user.save();
+   
     // console.log(user);
     let r_t = new Token({ token: tokens[1], user: user._id });
     await r_t.save();

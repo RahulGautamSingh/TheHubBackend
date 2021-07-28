@@ -33,12 +33,11 @@ const UserSchema = mongoose.Schema({
     default:[],
     unique:false,
     ref:'Post'
+  },
+  image:{
+    type:String,
+    required:false,
   }
-  // refreshToken: {
-  //   type: String,
-  //   required: true,
-  //   unique: false,
-  // },
 });
 
 const UserModel = mongoose.model("User", UserSchema);

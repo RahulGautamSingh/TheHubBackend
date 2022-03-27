@@ -64,7 +64,7 @@ const findUser = async (userObj) => {
     return { status: false, message: err };
   });
   if (user === null) return { status: false, message: "No such user" };
-  let result = bcrypt.compareSync(userObj.password, user.password); // true
+  let result = await bcrypt.compare(userObj.password, user.password).catch(err){console.log(err.message);return { status: false, message: "Technical Error" };}; // true
   if (!result) return { status: false, message: "Wrong password" };
 
   try {

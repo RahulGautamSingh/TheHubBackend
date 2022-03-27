@@ -70,6 +70,7 @@ const findUser = async (userObj) => {
   }catch(err){
     console.log(err.message);
     return { status: false, message: "Technical Error" };
+  }
   if (!result) return { status: false, message: "Wrong password" };
 
   try {

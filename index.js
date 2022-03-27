@@ -34,7 +34,7 @@ const userRouter = require("./routers/userRouter");
 const postRouter = require("./routers/postRouter");
 const { getUserData, createNewUser } = require("./controllers/userController");
 
-//
+
 app.get("/static/uploads/:file(*)", (req, res) => {
   let file = req.params.file;
   console.log(file)
@@ -62,7 +62,7 @@ app.post("/profile/:id", async (req, res) => {
   else res.status(400).json({ message: result.message });
 });
 
-const PORT = 3200;
+// const PORT = 3200;
 app.listen(process.env.PORT, () => {
   console.log("Listening at http://localhost:" + process.env.PORT);
 });

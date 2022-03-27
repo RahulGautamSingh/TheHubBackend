@@ -21,9 +21,9 @@ const storage = multer.diskStorage({
 });
 const multipart = multer({ storage: storage });
 //signup handler
-router.post("/signup",multipart.single('image'), async (req, res) => {
-  console.log(req.file)
-  console.log(req.body);
+router.post("/signup", async (req, res) => {
+  // console.log(req.file)
+  // console.log(req.body);
   req.body.image = req.file.path;
   let result = await createNewUser(req.body);
   if (result.status)
